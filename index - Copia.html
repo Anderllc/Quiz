@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <!-- Script principal do AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+    <!-- CSP unificada que libera Google AdSense -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="
+            default-src 'self' https://*.googlesyndication.com https://*.googleapis.com https://*.google.com https://*.gstatic.com;
+            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.gstatic.com https://*.googlesyndication.com https://*.googleapis.com;
+            style-src 'self' 'unsafe-inline' https://*.googleapis.com;
+            img-src 'self' data: https://*.ggpht.com https://*.googleusercontent.com https://*.googleapis.com https://*.googlesyndication.com;
+            frame-src https://*.googlesyndication.com https://*.google.com;
+          ">
+
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+
+    <title>Quiz</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2px;
+            background-color: #fff;
+            color: #000; /* Adicionado para garantir a cor do texto no tema claro */
+        }
+        .container {
+            background-color: #fff;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 0;
+            box-shadow: 0 0 0px rgba(0,0,0,0.1);
+        }
+        .ad-banner { 
+            margin: 0px auto;
+            text-align: center;
+            border: 1px solid #fff;
+            background-color: #fff;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        #pergunta {
+            font-size: 16px;
+            margin-bottom: 2px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .botao-alternativa {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2px 0;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .botao-alternativa button {
+            width: 50px;
+            height: 50px;
+            margin-right: 2px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: #fff;
+            transition: background-color 0.3s;
+            flex-shrink: 0;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .botao-alternativa button:hover:not([disabled]) {
+            background-color: #0056b3;
+        }
+        .texto-alternativa {
+            flex-grow: 1;
+            margin-left: 10px;
+            text-align: left;
+            width: 100%;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Estilos para o símbolo X interativo */
+        .botao-taxar {
+            cursor: pointer;
+            font-size: 24px;
+            margin-left: 10px;
+            color: #007BFF;
+            transition: color 0.3s;
+            user-select: none;
+        }
+        .botao-taxar:hover {
+            color: #0056b3;
+        }
+        #mensagem {
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #mensagem p {
+            margin: 5px 0;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #mensagem .correto {
+            color: green;
+            font-weight: bold;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #mensagem .incorreto {
+            color: red;
+            font-weight: bold;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #navegacao {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #navegacao button {
+            padding: 8px 11px;
+            font-size: 14px;
+            margin: 1px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: #fff;
+            transition: background-color 0.3s;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #navegacao button:hover:not([disabled]) {
+            background-color: #218838;
+        }
+        #reiniciar {
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: #fff;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #reiniciar:hover {
+            background-color: #218838;
+        }
+        #resultado {
+            text-align: left;
+            font-size: 13px;
+            margin-top: 30px;
+        }
+        #resultado h2 {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+        }
+        #temporizador {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: red;
+        }
+        .btn-imprimir {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #17a2b8;
+            color: #fff;
+            transition: background-color 0.3s;
+            text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .btn-imprimir:hover {
+            background-color: #138496;
+        }
+        #telaInicial {
+            text-align: center;
+            padding: 50px;
+        }
+        #telaInicial button {
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: #fff;
+            transition: background-color 0.3s;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        #telaInicial button:hover {
+            background-color: #218838;
+        }
+        #temaButtonInicial {
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: #000;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        #temaButtonInicial.dark-mode {
+            color: #e0e0e0;
+        }
+        /* Ajustes para o manual do usuário */
+        #manualUsuario {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 400px; /* Limita a altura para 400px */
+            overflow-y: auto; /* Adiciona scroll se o conteúdo exceder a altura */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #manualUsuario h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #manualUsuario h3 {
+            font-size: 18px;
+            margin-top: 15px;
+        }
+        #manualUsuario p, #manualUsuario li {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        #manualUsuario ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        /* Ajuste para o tema escuro */
+        body.dark-mode #manualUsuario {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border-color: #555;
+        }
+        /* Estilo para o scrollbar no tema escuro */
+        body.dark-mode #manualUsuario::-webkit-scrollbar {
+            width: 10px;
+        }
+        body.dark-mode #manualUsuario::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 5px;
+        }
+        /* Estilo para a seção de links recomendados */
+        #linksRecomendados {
+            margin-top: 30px;
+        }
+        #linksRecomendados h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        #linksRecomendados ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        #linksRecomendados ul li {
+            margin-bottom: 5px;
+        }
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .container.dark-mode {
+            background-color: #121212;
+        }
+        .botao-alternativa.dark-mode {
+            background-color: #1e1e1e;
+        }
+        .botao-alternativa.dark-mode .texto-alternativa {
+            color: #e0e0e0;
+        }
+        .botao-alternativa.dark-mode .botao-taxar {
+            color: #e0e0e0;
+        }
+        .botao-alternativa button.dark-mode {
+            background-color: #333333;
+            color: #e0e0e0;
+        }
+        .botao-alternativa button.dark-mode:hover:not([disabled]) {
+            background-color: #555555;
+        }
+        #temporizador.dark-mode {
+            color: #ff8080;
+        }
+        #navegacao button.dark-mode {
+            background-color: #333333;
+            color: #e0e0e0;
+        }
+        #navegacao button.dark-mode:hover:not([disabled]) {
+            background-color: #555555;
+        }
+        #temaButton.dark-mode {
+            background-color: transparent;
+            color: #e0e0e0;
+            border: none;
+        }
+        #temaButton.dark-mode:hover {
+            background-color: transparent;
+        }
+        #reiniciar.dark-mode,
+        #btnImprimir.dark-mode,
+        #voltarMenuQuiz.dark-mode,
+        #voltarMenuResultado.dark-mode {
+            background-color: #333333;
+            color: #e0e0e0;
+        }
+        #reiniciar.dark-mode:hover,
+        #btnImprimir.dark-mode:hover,
+        #voltarMenuQuiz.dark-mode:hover,
+        #voltarMenuResultado.dark-mode:hover {
+            background-color: #555555;
+        }
+        .botao-taxar.dark-mode {
+            color: #e0e0e0;
+        }
+        .botao-taxar.dark-mode:hover {
+            color: #cccccc;
+        }
+        #mensagem.dark-mode {
+            color: #e0e0e0;
+        }
+        #resultado.dark-mode {
+            color: #e0e0e0;
+        }
+        #progresso.dark-mode {
+            color: #e0e0e0;
+        }
+        h1.dark-mode, h2.dark-mode {
+            color: #e0e0e0;
+        }
+        /* Classe para destacar a alternativa */
+        .alternativa-selecionada {
+            background-color: #f1f1f1;
+            border: 2px solid #007BFF;
+            border-radius: 4px;
+        }
+        .alternativa-selecionada.dark-mode {
+            background-color: #2e2e2e;
+        }
+        @media print {
+            .btn-imprimir {
+                display: none;
+            }
+            #reiniciar {
+                display: none;
+            }
+            #voltarMenuResultado {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Tela Inicial -->
+        <div id="telaInicial" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+            <button id="temaButtonInicial" onclick="alternarTema()">🌙</button>
+            <h1 id="temaQuiz">Quiz</h1>
+
+            <!-- Bloco de anúncio do Google -->
+            <div class="ad-banner">
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:320px;height:100px"
+                     data-ad-client="ca-pub-1234567890123456"
+                     data-ad-slot="9876543210">
+                </ins>
+                <script>
+                  (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <!-- Fim do bloco de anúncio -->
+
+            <button id="btnIniciarQuiz"
+                    style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+                Iniciar Quiz
+            </button>
+
+            <!-- Manual do Usuário -->
+            <div id="manualUsuario"
+                 style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+                <h2>Manual do Usuário</h2>
+            </div>
+
+            <h3>1. Iniciando</h3>
+            <p><strong>Tela Inicial:</strong> Ao abrir o aplicativo, você verá a tela inicial com um botão <strong>"Iniciar Quiz"</strong>.</p>
+            <h3>2. Respondendo às Questões</h3>
+            <p><strong>Modos de Resposta:</strong></p>
+            <ul>
+                <li><strong>Responder Imediatamente:</strong>
+                    <ul>
+                        <li><strong>Como Funciona:</strong> Clique duas vezes na mesma alternativa (por exemplo, clique rapidamente duas vezes na opção "A").</li>
+                        <li><strong>Resultado:</strong> A resposta será registrada imediatamente, mostrando se está correta ou incorreta.</li>
+                    </ul>
+                </li>
+                <li><strong>Marcar e Responder no Final:</strong>
+                    <ul>
+                        <li><strong>Como Funciona:</strong> Clique uma vez na alternativa desejada para destacá-la. No final, todas as respostas serão avaliadas de uma vez.</li>
+                        <li><strong>Resultado:</strong> Você pode navegar entre as questões e responder todas de uma vez ao finalizar.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>3. Navegação entre Questões</h3>
+            <p><strong>Botões de Navegação:</strong></p>
+            <ul>
+                <li><strong>"Anterior":</strong> Volta para a pergunta anterior. Desativado na primeira questão.</li>
+                <li><strong>"Próxima":</strong> Avança para a próxima pergunta. Desativado na última questão.</li>
+            </ul>
+            <p><strong>Botão "Finalizar":</strong> Encerra o Quiz e gera o relatório de resultados.</p>
+            <p><strong>Botão "Voltar ao Menu":</strong> Retorna à tela inicial a qualquer momento durante o Quiz ou na tela de resultados.</p>
+
+            <h3>4. Mudança de Tema</h3>
+            <p><strong>Botão de Tema:</strong> Localizado na seção de navegação (🌙/☀️).</p>
+            <p><strong>Como Funciona:</strong></p>
+            <ul>
+                <li><strong>Modo Claro:</strong> Padrão com fundo claro e texto escuro.</li>
+                <li><strong>Modo Escuro:</strong> Clique no botão de tema para alternar para o modo escuro, com fundo escuro e texto claro.</li>
+                <li><strong>Indicador:</strong> O ícone do botão muda entre 🌙 (modo claro) e ☀️ (modo escuro).</li>
+            </ul>
+
+            <h3>5. Taxar Texto</h3>
+            <p><strong>Símbolo "X":</strong> Ao lado de cada alternativa, há um símbolo "X".</p>
+            <p><strong>Como Funciona:</strong></p>
+            <ul>
+                <li><strong>Marcar (Tachar):</strong> Clique no "X" para riscar (tachar) a alternativa correspondente, indicando que você não deseja selecioná-la.</li>
+                <li><strong>Desmarcar:</strong> Clique novamente no "↩️" (após ter marcado) para remover a marcação.</li>
+            </ul>
+
+            <h3>6. Temporizador das Questões</h3>
+            <p><strong>Exibição:</strong> Cada questão possui um temporizador visível no topo, iniciando em <strong>120 segundos</strong>.</p>
+            <p><strong>O que Acontece ao Acabar o Tempo:</strong></p>
+            <ul>
+                <li><strong>Resposta Automática:</strong> Se o tempo esgotar sem que você selecione uma alternativa, a questão será automaticamente marcada como <strong>Não Respondida</strong>.</li>
+                <li><strong>Exibição da Resposta Correta:</strong> Será exibida a resposta correta na seção de mensagens abaixo da pergunta.</li>
+            </ul>
+
+            <h3>7. Finalizando</h3>
+            <p><strong>Botão "Finalizar":</strong> Ao clicar, será encerrado e você será direcionado para a tela de resultados.</p>
+            <p><strong>Processamento das Respostas:</strong></p>
+            <ul>
+                <li><strong>Respostas Registradas:</strong> Todas as respostas selecionadas serão avaliadas.</li>
+                <li><strong>Respostas Não Respondidas:</strong> Serão marcadas automaticamente como incorretas.</li>
+            </ul>
+
+            <h3>8. Relatório de Resultados</h3>
+            <p><strong>Exibição:</strong> Após finalizar, você verá um relatório detalhado com:</p>
+            <ul>
+                <li><strong>Pontuação Total:</strong> Exibindo o número de respostas corretas em relação ao total de questões.</li>
+                <li><strong>Detalhamento por Questão:</strong> Para cada pergunta, será mostrado:
+                    <ul>
+                        <li><strong>Sua Resposta:</strong> Letra e texto da alternativa que você selecionou.</li>
+                        <li><strong>Explicação da Resposta:</strong> Detalhamento sobre por que a resposta está correta ou incorreta.</li>
+                        <li><strong>Resposta Correta:</strong> Letra e texto da alternativa correta.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p><strong>Links Recomendados:</strong> Se disponíveis, serão listados links úteis para aprofundamento.</p>
+
+            <h3>9. Imprimindo ou Salvando o Relatório</h3>
+            <p><strong>Botão "Salvar Relatório em PDF / Imprimir":</strong></p>
+            <p><strong>Como Funciona:</strong></p>
+            <ul>
+                <li><strong>Na Página Final:</strong> Utilize para salvar ou imprimir o relatório diretamente no dispositivo.</li>
+            </ul>
+            <h3>10. Reiniciando </h3>
+            <p><strong>Botão "Reiniciar":</strong> Na tela de resultados, clique para reiniciar o Quiz do zero, limpando todas as respostas anteriores.</p>
+
+            <h3>11. Voltar ao Menu</h3>
+            <p><strong>Botões "Voltar ao Menu":</strong> Retorna à tela inicial a qualquer momento.</p>
+            <h3>12. Equipe de Desenvolvimento</h3>
+            <p> Anderson Luíz Leite Carvalho.</p>
+            <p><strong> Contato:</strong> anderson.llcarvalho@upe.br.</p>
+
+        </div>
+    </div>
+
+    <!-- Conteúdo do Quiz (inicialmente oculto) -->
+    <div id="conteudoQuiz" style="display: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+
+        <!-- O cabeçalho será ocultado durante o quiz -->
+        <h1 id="temaQuizQuiz" style="display: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">Quiz</h1>
+
+        <div id="progresso">Questão 1 de X</div>
+
+        <!-- Temporizador -->
+        <div id="temporizador" style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">120s</div>
+
+        <!-- Campo responsivo para imagem da questão -->
+        <div id="imagemReferencia" style="display: none; text-align: center; margin-top: 20px; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+            <img id="imagemQuestao" src="" alt="Imagem da questão" style="max-width: 100%; height: auto; border-radius: 8px;">
+        </div>
+
+        <div id="pergunta">Carregando pergunta...</div>
+
+        <div class="botao-alternativa">
+            <button id="A">A</button>
+            <span id="alternativaA" class="texto-alternativa">Alternativa A</span>
+            <span class="botao-taxar" id="taxarA">X</span>
+        </div>
+        <div class="botao-alternativa">
+            <button id="B">B</button>
+            <span id="alternativaB" class="texto-alternativa">Alternativa B</span>
+            <span class="botao-taxar" id="taxarB">X</span>
+        </div>
+        <div class="botao-alternativa">
+            <button id="C">C</button>
+            <span id="alternativaC" class="texto-alternativa">Alternativa C</span>
+            <span class="botao-taxar" id="taxarC">X</span>
+        </div>
+        <div class="botao-alternativa">
+            <button id="D">D</button>
+            <span id="alternativaD" class="texto-alternativa">Alternativa D</span>
+            <span class="botao-taxar" id="taxarD">X</span>
+        </div>
+        <div class="botao-alternativa">
+            <button id="E">E</button>
+            <span id="alternativaE" class="texto-alternativa">Alternativa E</span>
+            <span class="botao-taxar" id="taxarE">X</span>
+        </div>
+
+        <div id="mensagem"></div>
+
+        <div id="navegacao">
+            <button id="anterior" disabled>Anterior</button>
+            <button id="proximo">Próxima</button>
+            <button id="finalizar">Finalizar</button>
+            <button id="temaButton" onclick="alternarTema()">🌙</button>
+        </div>
+
+        <!-- Botão "Voltar ao Menu" durante o Quiz -->
+        <button id="voltarMenuQuiz">Voltar ao Menu</button>
+
+    </div>
+
+    <!-- Tela de Resultados (inicialmente oculto) -->
+    <div id="telaResultado" style="display: none;">
+        <!-- Mostrar o cabeçalho na tela de resultados -->
+        <h1 id="temaQuizResultado">Quiz</h1>
+
+        <div id="resultado"></div>
+
+        <!-- Botão "Reiniciar" -->
+        <button id="reiniciar" style="display: none;">Reiniciar</button>
+
+        <!-- Botão para imprimir ou salvar em PDF -->
+        <button id="btnImprimir" class="btn-imprimir" style="display: none;">Salvar Relatório em PDF / Imprimir</button>
+
+        <!-- Botão "Voltar ao Menu" na tela de resultados -->
+        <button id="voltarMenuResultado" style="display: none; margin-top: 20px;">Voltar ao Menu</button>
+    </div>
+
+    <!-- JSON embutido no HTML -->
+    <script id="quiz-data" type="application/json">
+      {
+         "tema": "Segunda Fase - Trabalhista - OAB ",
+         "links": [
+             {
+                 "titulo": "Vídeo Sugerido",
+                 "url": ""
+             }
+         ],
+         "perguntas": [
+            /* ... TODAS AS PERGUNTAS ... */
+         ]
+      }
+    </script>
+
+    <script src="cordova.js"></script>
+    <script>
+        // (Seu script do quiz permanece igual)
+        // Função para alternar o tema (claro/escuro) etc...
+        // ...
+    </script>
+
+</body>
+</html>
